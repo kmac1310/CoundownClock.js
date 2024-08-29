@@ -1,0 +1,80 @@
+import React, { useState, useEffect } from 'react';
+
+const CountdownClock = () => {
+  const [minutesLeftInYear, setMinutesLeftInYear] = useState(0);
+  const [minutesLeftInDay, setMinutesLeftInDay] = useState(0);
+  const [goalMinutes, setGoalMinutes] = useState(0);
+  const [goalName, setGoalName] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [finishDate, setFinishDate] = useState('');
+
+  useEffect(() => {
+    const updateCountdown = () => {
+      const now = new Date();
+      const endOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
+      const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+
+      setMinutesLeftInYear(Math.floor((endOfYear - now) / (1000 * 60)));
+      setMinutesLeftInDay(Math.floor((endOfDay - now) / (1000 * 60)));
+
+      if (startDate && finishDate) {
+        const start = new Date(startDate);
+        const finish = new Date(finishDate);
+        const minutesUntilFinish = Math.floor((finish - now) / (1000 * 60));
+        setGoalMinutes(Math.max(0, minutesUntilFinish));
+      }
+    };
+
+    updateCountdown();
+    const intervalId = setInterval(updateCountdown, 60000); // Update every minute
+
+    return () => clearInterval(intervalId);
+  }, [startDate, finishDate]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Form submission logic here if needed
+  };
+
+  return (
+    <div>
+      <div>{minutesLeftInYear} minutes left in year</div>
+      <div>{minutesLeftInDay} minutes left today</div>
+      <form onSubmit={handleSubmit}>
+        <label>
+          Goal/Task Name:
+          <input
+            type="text"
+            value={goalName}
+            onChange={(e) => setGoalName(e.target.value)}
+            placeholder="Enter your goal"
+          />
+        </label>
+        <label>
+          Start Date:
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+          />
+        </label>
+        <label>
+          Finish Date:
+          <input
+            type="date"
+            value={finishDate}
+            onChange={(e) => setFinishDate(e.target.value)}
+          />
+        </label>
+      </form>
+      {goalName && goalMinutes > 0 && (
+        <div>
+          <h2>{goalName}</h2>
+          <div>{goalMinutes} minutes left to achieve your goal</div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default CountdownClock;
